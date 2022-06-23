@@ -26,7 +26,7 @@ extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
-#include "stm32fxxx.h"  /* replace 'stm32xxx' with your HAL driver header filename, ex: stm32f4xx.h */
+#include "stm32f4xx.h"  /* replace 'stm32xxx' with your HAL driver header filename, ex: stm32f4xx.h */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -51,11 +51,11 @@ extern "C" {
 #define USBD_DEBUG_LEVEL                            2U
 
 /* ECM, RNDIS, DFU Class Config */
-#define USBD_SUPPORT_USER_STRING_DESC               1U
+#define USBD_SUPPORT_USER_STRING_DESC               0U
 
 /* BillBoard Class Config */
 #define USBD_CLASS_USER_STRING_DESC                 1U
-#define USBD_CLASS_BOS_ENABLED                      1U
+#define USBD_CLASS_BOS_ENABLED                      0U
 #define USB_BB_MAX_NUM_ALT_MODE                     0x2U
 
 /* MSC Class Config */

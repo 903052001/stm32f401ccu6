@@ -241,14 +241,17 @@ void HAL_UART_MspInit(UART_HandleTypeDef *huart)
         HAL_NVIC_SetPriority(DMA2_Stream5_IRQn, 0, 0);   
         HAL_NVIC_EnableIRQ(DMA2_Stream5_IRQn);
 
-        /*Enable the RXNE Interrupt*/
+        /*Enable the uart Interrupt*/
         __HAL_UART_ENABLE_IT(huart, UART_IT_RXNE);
-        /*Enable the IDLE Interrupt*/
         __HAL_UART_ENABLE_IT(huart, UART_IT_IDLE);
+        
+        /* Clear event flag bit (xxIF) before open interrupt */
+        __HAL_UART_CLEAR_FLAG(huart, UART_FLAG_TC);
+        __HAL_UART_CLEAR_FLAG(huart, UART_FLAG_TXE);
 
         /* UART1 Set Priority and Enable */
         HAL_NVIC_SetPriority(USART1_IRQn, 9, 0);
-        //HAL_NVIC_EnableIRQ(USART1_IRQn);
+        HAL_NVIC_EnableIRQ(USART1_IRQn);
     }
     else if (huart->Instance == USART2)
     {
@@ -264,13 +267,13 @@ void HAL_UART_MspInit(UART_HandleTypeDef *huart)
         GPIO_InitStruct.Alternate = GPIO_AF7_USART2;
         HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-        /*Enable the RXNE Interrupt*/
+        /*Enable the uart Interrupt*/
         __HAL_UART_ENABLE_IT(huart, UART_IT_RXNE);
-        /*Enable the IDLE Interrupt*/
         __HAL_UART_ENABLE_IT(huart, UART_IT_IDLE);
         
-        /* UART2 Set Priority */
+        /* UART2 Set Priority and Enable */
         HAL_NVIC_SetPriority(USART2_IRQn, 9, 0);
+        HAL_NVIC_EnableIRQ(USART2_IRQn);
     }
     else if (huart->Instance == USART6)
     {
@@ -286,13 +289,13 @@ void HAL_UART_MspInit(UART_HandleTypeDef *huart)
         GPIO_InitStruct.Alternate = GPIO_AF8_USART6;
         HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-        /*Enable the RXNE Interrupt*/
+        /*Enable the uart Interrupt*/
         __HAL_UART_ENABLE_IT(huart, UART_IT_RXNE);
-        /*Enable the IDLE Interrupt*/
         __HAL_UART_ENABLE_IT(huart, UART_IT_IDLE);
         
-        /* UART6 Set Priority */
+        /* UART6 Set Priority and Enable */
         HAL_NVIC_SetPriority(USART6_IRQn, 9, 0);
+        HAL_NVIC_EnableIRQ(USART6_IRQn);
     }
     
     return;

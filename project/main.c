@@ -215,7 +215,7 @@ int main(int argc, char *argv[])
     /* Infinite loop */
     while (1)
     {
-        HAL_Delay(1000);
+        HAL_Delay(100);
         HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
         //HAL_UART_Transmit_DMA(&UART1_Handle, "hello world!\r\n", sizeof("hello world!\r\n"));
         usb_printf("hello usbd\r\n", sizeof("hello usbd\r\n"));

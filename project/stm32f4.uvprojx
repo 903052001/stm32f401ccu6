@@ -53,7 +53,7 @@
           <OutputName>stm32f4</OutputName>
           <CreateExecutable>1</CreateExecutable>
           <CreateLib>0</CreateLib>
-          <CreateHexFile>0</CreateHexFile>
+          <CreateHexFile>1</CreateHexFile>
           <DebugInformation>1</DebugInformation>
           <BrowseInformation>1</BrowseInformation>
           <ListingPath>..\object\</ListingPath>
@@ -328,7 +328,7 @@
             <uGnu>0</uGnu>
             <useXO>0</useXO>
             <v6Lang>3</v6Lang>
-            <v6LangP>3</v6LangP>
+            <v6LangP>0</v6LangP>
             <vShortEn>1</vShortEn>
             <vShortWch>1</vShortWch>
             <v6Lto>0</v6Lto>
@@ -369,7 +369,7 @@
             <TextAddressRange>0x08000000</TextAddressRange>
             <DataAddressRange>0x20000000</DataAddressRange>
             <pXoBase></pXoBase>
-            <ScatterFile></ScatterFile>
+            <ScatterFile>..\object\stm32f4.sct</ScatterFile>
             <IncludeLibs></IncludeLibs>
             <IncludeLibsPath></IncludeLibsPath>
             <Misc>--keep *.o(command)</Misc>
@@ -896,9 +896,19 @@
               <FilePath>..\library\STM32_USB_Device_Library\Core\Src\usbd_conf.c</FilePath>
             </File>
             <File>
+              <FileName>usbd_conf.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\library\STM32_USB_Device_Library\Core\Inc\usbd_conf.h</FilePath>
+            </File>
+            <File>
               <FileName>usbd_core.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\library\STM32_USB_Device_Library\Core\Src\usbd_core.c</FilePath>
+            </File>
+            <File>
+              <FileName>usbd_core.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\library\STM32_USB_Device_Library\Core\Inc\usbd_core.h</FilePath>
             </File>
             <File>
               <FileName>usbd_ctlreq.c</FileName>
@@ -906,14 +916,34 @@
               <FilePath>..\library\STM32_USB_Device_Library\Core\Src\usbd_ctlreq.c</FilePath>
             </File>
             <File>
+              <FileName>usbd_ctlreq.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\library\STM32_USB_Device_Library\Core\Inc\usbd_ctlreq.h</FilePath>
+            </File>
+            <File>
               <FileName>usbd_desc.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\library\STM32_USB_Device_Library\Core\Src\usbd_desc.c</FilePath>
             </File>
             <File>
+              <FileName>usbd_desc.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\library\STM32_USB_Device_Library\Core\Inc\usbd_desc.h</FilePath>
+            </File>
+            <File>
               <FileName>usbd_ioreq.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\library\STM32_USB_Device_Library\Core\Src\usbd_ioreq.c</FilePath>
+            </File>
+            <File>
+              <FileName>usbd_ioreq.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\library\STM32_USB_Device_Library\Core\Inc\usbd_ioreq.h</FilePath>
+            </File>
+            <File>
+              <FileName>usbd_def.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\library\STM32_USB_Device_Library\Core\Inc\usbd_def.h</FilePath>
             </File>
           </Files>
         </Group>
@@ -926,9 +956,19 @@
               <FilePath>..\library\STM32_USB_Device_Library\Class\CDC\Src\usbd_cdc.c</FilePath>
             </File>
             <File>
+              <FileName>usbd_cdc.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\library\STM32_USB_Device_Library\Class\CDC\Inc\usbd_cdc.h</FilePath>
+            </File>
+            <File>
               <FileName>usbd_cdc_if.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\library\STM32_USB_Device_Library\Class\CDC\Src\usbd_cdc_if.c</FilePath>
+            </File>
+            <File>
+              <FileName>usbd_cdc_if.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\library\STM32_USB_Device_Library\Class\CDC\Inc\usbd_cdc_if.h</FilePath>
             </File>
           </Files>
         </Group>

@@ -81,7 +81,7 @@ USBD_StatusTypeDef USBD_CtlSendData(USBD_HandleTypeDef *pdev,
                                     uint8_t *pbuf, uint32_t len);
 
 USBD_StatusTypeDef USBD_CtlContinueSendData(USBD_HandleTypeDef *pdev,
-                                            uint8_t *pbuf, uint32_t len);
+        uint8_t *pbuf, uint32_t len);
 
 USBD_StatusTypeDef USBD_CtlPrepareRx(USBD_HandleTypeDef *pdev,
                                      uint8_t *pbuf, uint32_t len);
