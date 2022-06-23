@@ -1,0 +1,222 @@
+gcc学习笔记
+	1. 由c源码到可执行文件的过程，宏观上叫 编译，这个宏观的编译又可以分解为四个子过程，分别是 预处理 汇编 编译 链接，子过程的编译和宏观的编译不是一个概念。
+	宏观的编译工具就叫 gcc 或 arm-none-eabi-gcc，子过程分别对应不同的参数。
+	参数：
+		-o  输出文件，后跟输出文件的名字，等同于 >
+		-I	指定自定义的头文件路径
+		-L	指定自定义的库问价路径
+		-D	预定义一个宏， -D XXX 等同于在源文件中 #define XXX
+		-v  打印出编译器内部编译各过程的信息以及编译器版本
+		-Wl	指定链接器参数	
+		-x  指定文件格式，其后可跟c, objective-c, c-header, c++, cpp-output, assembler, and assembler-with-cpp； 预处理 .S 的文件时用 -x assembler-with-cpp
+			gcc -x c hello.pig -x none hello2.c  表示 hello.pig 按 c 文件处理，之后的文件按默认后缀处理
+
+	子过程：
+		-E 预处理：把 .h 和 .c 展开成一个文件，宏定义、头文件、库文件直接替换，生成 .i的中间文件
+			gcc  -E  hello.c  -o  hello.i	# gcc这个工具使用 -E的参数处理hello.c文件，输出(-o)的文件为hello.i  (.c -> .i)
+		-s 汇编：把 .i 文件生成一个汇编文件 .s
+			gcc  -s  hello.i  -o  hello.s	# gcc这个工具使用 -s的参数处理hello.i文件，输出(-o)的文件为hello.s  (.i -> .s)
+		-c 编译：把 .s 文件生成一个目标文件 .o / .obj
+			gcc  -c  hello.s  -o  hello.o	# gcc这个工具使用 -c的参数处理hello.s文件，输出(-o)的文件为hello.o  (.s -> .o)
+		   链接：把 .o 文件生成一个可执行文件 .elf / .exe
+			gcc  hello.o  -o  hello
+		上述四步可以合并为一句话，即：
+			gcc  -c  hello.c  -o  hello                                                                   (.c -> .o)
+
+	2. Makefile 语法
+	    TARGET  := $(targ)  可以实现make命令中带入参数，即make targ=fs 就会编译fs路径下的文件
+		# 是注释， 同时规定 第一个目标文件是最终总目标
+		1. 显示规则的书写格式如下
+			目标文件 : 依赖文件
+			[TAB]依赖文件生成目标文件的指令
+			hello : hello.o				#目标文件 hello 依赖于文件 hello.o
+				gcc hello.o -o hello		#由此指令实现依赖文件到目标文件的生成； -o 后是目标文件，前是依赖文件
+			hello.o : hello.s
+				gcc -c hello.s -o hello.o
+			hello.s : hello.i
+				gcc -s hello.i -o hello.s
+			hello.i : hello.c
+				gcc -E hello.c -o hello.i
+			上述四步可以合并为一步，即：
+			hello : hello.c
+				gcc -c hello.c -o hello
+
+			扩展到多个文件，则：
+			all : obj1.o  obj2.o  obj3.o
+				gcc obj1.o obj2.o obj3.o -o all
+			obj1.o : obj1.c
+				gcc -c obj1.c -o obj1.o
+			obj2.o : obj2.c
+				gcc -c obj2.c -o obj2.o
+			obj3.o : obj3.c
+				gcc -c obj3.c -o obj3.o
+
+		2. 变量 （类似宏，是个替换的过程）
+			变量的使用  $(变量名)
+			变量的赋值  =（赋值） +=（追加赋值） ：=（恒等于，类似常量，一次赋值终身不变，所以：=的变量其后不可再有+=或=的操作）
+			使用 $(warning $(变量名)) 实现通过打印调试makefile
+
+			TAR = all
+			OBJ = obj1.o  obj2.o  obj3.o
+			CC := gcc
+			RM := rm -rf
+
+		3. 隐含规则  %.c %.o 指任意的 .c/.o 文件； *.o *.c 指所有的 .o/.c 文件;
+			% 和 * 都是所有、任意的通配符，只是 % 是make的语法词，* 是shell的语法词
+			
+			$(TAR) : $(OBJ)
+				$(CC)  $(OBJ)  -o  $(TAR)
+			%.o : %.c
+				$(CC)  -c  %.c  -o  %.o
+			.PHONY
+			cleanall:
+				$(RM)  $(OBJ)  $(TAR)
+			clean:
+				$(RM)  $(OBJ)
+
+		4. 通配符  注：这里的所有不是总和集合的意思，而是任意，任一的意思。即只要是个依赖文件就可以用 $^ 表示，只要是个目标文件就可以用 $@ 表示
+            $^ 所有的依赖文件
+            $@ 所有的目标文件
+            $< 所有依赖文件中的第一个文件
+        
+		    $(TAR) : $(OBJ)
+				$(CC)  $^  -o  $@
+			%.o : %.c
+				$(CC)  -c  $^  -o  $@
+			.PHONY
+			cleanall:
+				$(RM)  $(OBJ)  $(TAR)
+			clean:
+				$(RM)  $(OBJ)
+			
+		5. 函数
+		
+	
+	3. 其他
+		JLink 和 StLink 其实就是 JTAG 的 adapter， 即 JTAG/SWD 协议的适配器
+		JLinkGDBServer 和 openocd 是同等的2选一的gdb服务端工具，他两创建成功后会建立一路tcp，然后你根据被调试文件是运行在单片机平台还是pc平台，对应使用arm-none-eabi-gdb或gdb建立一个客户端即可。
+		用 gcc/gdb 还是 arm-none-eabi-gcc/gdb 取决于文件要在哪个平台运行, 运行于单片机上的无论是编译还是调试都用arm-none-eabi-开头的工具。
+
+		使用openocd：
+			openocd -f project/JLinkOB.cfg  建立openocd的服务端，会创建2个服务端，一个telnet服务端，一个gdb服务端
+			从属于openocd服务端的两个客户端的区别是gdb的客户端在使用时，各命令需要加上前缀monitor; 
+			例如 monitor halt，而telnet客户端则不需要；同时由JLinkGDBServer创建的客户端也不需要。
+			(1) 新建窗口输入 telnet localhost 4444	建立连接到openocd-telnet客户端的服务端，固定端口4444  或者
+			(2) 新建窗口输入 arm-none-eabi-gdb -> xxx.elf -> target remote localhost:3333 -> monitor reset halt -> s
+			(3) 新建窗口输入 arm-none-eabi-gdb 后再输入 target remote localhost:3333  建立连接到openocd-gdb客户端的服务端，固定端口3333
+				之后输入 (gdb)pwd -> monitor reset halt -> file xxx.elf -> load -> -/focus -> b main -> c 开始gbd调试
+
+
+		使用gdb：
+			JLinkGDBServer -if SWD -device Cortex-M4 -speed 2000   建立JLinkGDB的服务端, 2000KHz
+			arm-none-eabi-gdb xxx.elf -ex "target remote localhost:2331"      建立gdb的客户端，固定端口2331
+
+	4. gdb 命令
+		help 查看gdb命令类别
+		r/run 开始/重新开始执行应用程序，应用程序重头开始，直到遇到断点
+		list 列出源码，持续键入回车，代码向后展开
+		n/next 单步执行，单步调试
+		回车 重复执行上条命令
+		finish/fin 结束当前函数
+		s 跳入函数
+		b func/line 用于设置断点，可以在文件某一行，某个函数等
+		del 1 删除1号断点
+		dis 1 关闭1号断点
+		en 1 打开1号断点
+		info b 查看所有断点(i b)
+		info register 查看寄存器
+		p var 打印变量，可以打印当前所有变量，打印类型需要匹配
+		x /10wx 0x08000000  从flash地址0x08000000开始往后打印10个字(w)的内容  
+		set var 设置变量值
+		bt 查看调用栈
+		watch 观察点(地址)，当地址中的内容发生变化，程序会停下来
+		condition 当 0x565d046c 的内容被修改成 0 时停下来
+		frame 3 跳到栈的第三层，方便查看当前栈信息
+		c 继续执行，直到下一个断点
+		disassemble main  显示main函数对应的汇编代码
+		disassemble /m ptr 反汇编出指针附近的代码
+		q 退出GDB
+		-/focus 显示源码
+			winheight src +/-5  调整串口大小
+			ctrl+x      是命令前缀
+			ctrl+x a    退出focus
+			ctrl+x 2    切换focus窗口
+			ctrl+l 		刷新显示窗口
+			ctrl+p 		上一条命令
+			ctrl+n 		下一条命令
+			ctrl+b 		命令行光标前移
+			ctrl+f 		命令行光标后移
+			B  			表示该断点已到达，代码未执行
+			b 			表示该断点未到达
+			+			表示断点使能
+			-			表示断点失能
+			>			表示将要执行的代码
+
+	5. map 符号表注解：
+		readelf -a/-t/-s xxx.o/elf  能够看到段的信息
+		objdump -t xxx.o/elf  能够显示符号表
+ 		arm-none-eabi-nm --size-sort -C -r xxx.elf  按占用空间从大到小排序符号表
+		arm-none-eabi-nm -n --defined-only -C xxx.out/elf > xxx.sym   可以输出执行文件函数地址和函数名称的对照表
+		arm-none-eabi-size *.o  各文件3个段(.text .data .bss)的大小
+		局部变量在map中无符号映射，故找不到; map中只有全局的符号可以找到，比如data，bss，rodata，text和func
+
+	6. ld 文件解读
+	    源文件中定义但未被引用的变量链接时会被删除，但是加上KEEP后，则会被保留。
+        data段数据有LOADADDR(data段数据在ROM中的地址)，ADDR(data段数据在RAM中的地址)和SIZE(data段数据的长度)三个参数；
+        bss段数据有ADDR(bss段数据在RAM中的地址)和SIZE(bss段数据的长度)两个参数
+	 	*(.text)	前面的 * 指 所有的 意思； 表示所有输入文件的 .text段
+		*(.text*)  	前面的 * 指 所有的 意思； 后面的 * 是 通配符 的意思，表示 .text 后可跟任意(其后必须有字符)长度的字符;
+					.text和其后的任意字符构成一个段名，一个段名下可以放 多 个.o文件中的同类段
+		a.o(.data)  表示 a.o文件中的 .data段
+		a.o 		表示 a.o文件中的 所有段
+		(*(EXCLUDE_FILE (*a.o *b.o) .text))  表示除了 a.o和 b.o文件外的所有输入文件的 .text段
+		*fill*     	指填充的意思，即在某两个段之间的0值填充，以达到地址值对齐的目的
+		          	eg: *fill*  0x0800575a  0x2  指从地址0x0800575a往后补0x2个0值，即地址0x0800575a和0x0800575b中的内容为0
+		*(.text .data) 	表示所有文件的 .text段和 .data段
+					顺序是第一个文件的 .text段, 第一个文件的 .data段; 第二个文件的 .text段, 第二个文件的 .data段, …
+		*(.text) *(.data) 	表示所有文件的 .text段和 .data段
+					顺序是第一个文件的 .text段, 第二个文件的 .text段, …, 最后一个文件的 .text段; 第一个文件的 .data段, 第二个文件的
+					.data段, …, 最后一个文件的 .data段
+
+		> 任何一个文件的任何一个段，在ld文件中都只能至多使用一次(可以不用，但不能重复用);  先写特殊的，再写通配的
+			SECTIONS { .data1 : { *(.data) }  .data2 : { a.o(.data) } }   /* 错误 */
+			SECTIONS { .data2 : { a.o(.data) }  .data1 : { *(.data) } }   /* 正确 */ 
+			/* 先把a.o中的.data段放入.data2段中; 再将除a.o文件外其余文件中的.data段放入.data1段中 */
+
+	7. asm 解读
+		__asm__ volatile( "dsb" ::: "memory" );  强制将预取指指令放入cpu中registers和cache内的数据作废
+			1. dsb : data synchronization barrier 数据同步屏障
+			2. __asm__ : 编译器关键字, 用于指示编译器在此插入汇编语句，语法为 (汇编语句:输出部分:输入部分:破坏描述部分)，不用的部分可以不写，
+						 其中 i 表示立即数 参考 https://www.796t.com/content/1543309144.html
+      		3. __volatile__ : 相当于C语言的volatile(易变的，从内存中取值，而不是在cpu的寄存器内取值).
+      		4. memory : 强制gcc编译器假设RAM所有内存单元均被汇编指令修改，这样cpu中的registers和cache中已缓存的内存单元中的数据将作废;
+      		   cpu将不得不在需要的时候重新读取内存中的数据。这就阻止了cpu又将registers，cache中的数据用于去优化指令，而不去访问内存
+      		5. [12] 从地址12处取值，而12必然是个指针(地址)变量的值，汇编的[]内是变量的地址
+
+
+	參考資料
+		https://zhuanlan.zhihu.com/p/347611674       //gcc
+		https://blog.csdn.net/shenjin_s/article/details/88712249   //.ld
+		https://blog.csdn.net/Cui_Hongwei/article/details/104108044   //.ld .s
+		https://stackoverflow.com/questions/40532180/understanding-the-linkerscript-for-an-arm-cortex-m-microcontroller //.ld
+		https://www.cnblogs.com/zongzi10010/p/9784797.html  //openocd
+		https://www.sourceware.org/gdb/documentation/    //gdb
+		https://stackoverflow.com/questions/38033130/how-to-use-the-gdb-gnu-debugger-and-openocd-for-microcontroller-debugging-fr
+		https://blog.csdn.net/Mculover666/article/details/84900665
+		https://blog.csdn.net/weixin_41406493/article/details/98883557   //usage
+		http://wanghao.vip/books/newos/page/ubuntueclipsegdbopenocdstlink%E6%90%AD%E5%BB%BAstm32%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83     //openocd & gdb
+		https://www.gnu.org/software/make/manual/html_node/Implicit-Variables.html    //gnu
+		https://blog.csdn.net/zhengyangliu123/article/details/54934719    //gdb
+		https://www.jianshu.com/p/e6af28e2566f   //gdb
+		https://wiki.osdev.org/ELF
+		https://mcuoneclipse.com/2013/04/14/text-data-and-bss-code-and-data-size-explained/
+		https://www.nosuchfield.com/2018/11/23/Program-compilation-linking-loading-and-running/    //段
+		https://huhaipeng.top/2019/09/15/%E7%AC%A6%E5%8F%B7%E8%A1%A8%E7%9A%84%E4%B8%80%E4%BA%9B%E4%BA%8B%E4%B8%80%E4%BA%9B%E6%83%85/    //符号表
+		https://qianchenzhumeng.github.io/posts/memory_footprint_analysis_method_for_embedded_systems/        //map
+		https://www.cs-fundamentals.com/c-programming/memory-layout-of-c-program-code-data-segments
+		https://www.codeleading.com/article/28134715362/     //工具链
+		https://www.cnblogs.com/mynight2012/p/14085944.html   //thumb
+		http://tianyu-code.top/GDB%E8%B0%83%E8%AF%95/GDB%E8%B0%83%E8%AF%95%E4%B9%8B%E5%9B%BE%E5%BD%A2%E5%8C%96%E7%95%8C%E9%9D%A2%EF%BC%88TUI%EF%BC%89/   //gdb ui
+		https://willalpha.github.io/2017/03/29/freertos-code-learning/    //FreeRTOS
+		
+
